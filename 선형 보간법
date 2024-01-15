@@ -1,0 +1,28 @@
+import pandas as pd
+import numpy as np
+from scipy.interpolate import interp1d
+
+# CSV 파일에서 데이터 불러오기
+data = pd.read_csv('혈당_표준편차_연습용.csv')
+
+# '31~32' 연령대에 해당하는 행 선택
+age_row_31_32 = data.loc[data['나이'] == '31~32']
+
+# '1분위수 (mg/dL)'부터 '99분위수 (mg/dL)'까지의 열에서 데이터 추출
+hdl_values_31_32 = age_row_31_32.iloc[0, 14:23].to_numpy()
+
+# 분위수 데이터
+percentiles = np.array([1, 5, 10, 25, 50, 75, 90, 95, 99])
+
+
+# 선형 보간 함수 생성
+f = interp1d(hdl_values_31_32, percentiles, bounds_error=False, fill_value="extrapolate")
+
+# 사용자가 혈당 농도를 입력하면 상위 백분위수를 반환하는 함수
+def find_percentile(blood_sugar_concentration):
+    return f(blood_sugar_concentration)
+
+# 예시: 혈당 농도가 80mg/dL일 때 상위 백분위수 계산
+blood_sugar_example_80 = 80
+percentile_example_80 = find_percentile(blood_sugar_example_80)
+print(f"혈당 농도 {blood_sugar_example_80}mg/dL는 상위 {percentile_example_80:.2f}%에 위치합니다.")
